@@ -23,7 +23,10 @@ const login = async (req, res) => {
     { expiresIn: '1d' },
     (err, token) => {
       if (err) res.status(400).json({ message: 'Internal error' });
-      else res.status(200).json({ token, user: { name: user.name, email: user.email } });
+      else
+        res
+          .status(200)
+          .json({ token, user: { id: user.id, name: user.name, email: user.email } });
     }
   );
 };

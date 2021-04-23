@@ -1,130 +1,171 @@
-import React, { useState, useContext } from 'react';
-import { ScrollView, SafeAreaView, View, TouchableOpacity, StyleSheet } from 'react-native';
-import { ListItem, Text, Overlay, Input, Button } from 'react-native-elements';
+import React, { useState, useContext, useEffect } from 'react';
+import { ScrollView, View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { ListItem, Text, Overlay, Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import AuthContext from '../../contexts/authContext';
+import api from '../../services/api';
 
 const ListOfLists = ({ navigation }) => {
-  const { signOut } = useContext(AuthContext);
-  // estado com o nome inicial da lista
-  const [nameList, setNameList] = useState('');
+  const { user, signOut } = useContext(AuthContext);
 
-  // estados co a visibilidade dos modais
+  const [title, setTitle] = useState('');
+
   const [visibleCreate, setVisibleCreate] = useState(false);
   const [visibleUpdate, setVisibleUpdate] = useState(false);
   const [visibleMenu, setVisibleMenu] = useState(false);
 
-  // estado com id da lista selecionada "onLongPress"
+  const [notification, setNotification] = useState('');
+
   const [activedList, setActivedList] = useState(0);
 
-  // estado com a lista de listas
-  const [lists, setLists] = useState([
-    {
-      id: 123,
-      title: 'Lista top',
-      date: '05/04/2021',
-      price: 353.44,
-      quantity: 2,
-    },
-    {
-      id: 456,
-      title: 'Lista supimpa',
-      date: '12/03/2021',
-      price: 793.42,
-      quantity: 2,
-    },
-  ]);
+  const [lists, setLists] = useState([]);
 
-  // função para trocar a visibilidade do modal de criação
+  useEffect(() => {
+    getLists();
+  }, []);
+
+  const getLists = async () => {
+    console.log(`getting lists from database`);
+    await api
+      .get(`/users/${user.id}/lists`)
+      .then((response) => setLists(response.data))
+      .catch((err) => console.log(err));
+  };
+
   const toggleOverlayCreate = () => {
     setVisibleCreate(!visibleCreate);
   };
 
-  // função para mostrar o modal de update
-  // e colocar os dados nos campos
   const toggleOverlayUpdate = () => {
     setVisibleMenu(!visibleMenu);
     setVisibleUpdate(!visibleUpdate);
-
-    lists.forEach((list) => {
-      if (list.id == activedList) setNameList(list.title);
-    });
   };
 
-  // função para mostrar o menu (editar/excluir)
   const toggleOverlayMenu = (id) => {
     setActivedList(id);
     setVisibleMenu(!visibleMenu);
   };
 
-  // função para criar uma lista
-  const handlerCreate = () => {
-    const newList = {
-      id: Math.floor(Math.random() * 9999),
-      title: nameList,
-      date: Date.now(),
-      price: 0,
-      quantity: 0,
-    };
+  const handlerCreate = async () => {
+    try {
+      console.log(`creating list`);
+      await api.post(`/users/${user.id}/lists`, { title });
+      setTitle('');
+      getLists();
+      sendNotification('Lista criada');
+    } catch (err) {
+      sendNotification('Revise as informações');
+    }
 
-    setLists([...lists, newList]);
-    toggleOverlayCreate(!visibleCreate);
+    toggleOverlayCreate();
   };
 
-  // função para atualizar o nome de uma lista
   const handlerUpdate = () => {
     setVisibleUpdate(!visibleUpdate);
-
-    lists.forEach((list) => {
-      if (list.id === activedList) {
-        list.title = nameList;
-      }
-    });
-
-    setLists(lists);
   };
 
-  // função para deletar uma lista
-  const handlerDelete = () => {
+  const handlerDelete = async () => {
     setVisibleMenu(!visibleMenu);
 
-    const updatedLists = lists.filter((list) => list.id != activedList);
+    try {
+      console.log(`Deleting list`);
+      const url = `/users/${user.id}/lists/${activedList}`;
+      console.log(url);
+      await api.delete(url);
+      getLists();
+      sendNotification('A lista foi deletada');
+    } catch (err) {
+      sendNotification('Não foi possivel deletar a lista');
+    }
+  };
 
-    setLists(updatedLists);
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
+  const sendNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => {
+      setNotification('');
+    }, 2000);
   };
 
   return (
     <View style={styles.container}>
+      {notification != '' ? (
+        <View style={styles.notification}>
+          <Text style={styles.notificationText}>{notification}</Text>
+        </View>
+      ) : (
+        <></>
+      )}
+
       <ScrollView style={styles.scroll}>
-        {lists.map((list, index) => (
-          <ListItem
-            key={index}
-            onPress={() => navigation.navigate('GroceryList', { id: list.id })}
-            onLongPress={() => toggleOverlayMenu(list.id)}
-            bottomDivider
-          >
-            <ListItem.Content>
-              <ListItem.Title style={styles.listTitle}>{list.title}</ListItem.Title>
-              <ListItem.Subtitle>{list.quantity} items</ListItem.Subtitle>
-              <ListItem.Subtitle>{list.date}</ListItem.Subtitle>
-            </ListItem.Content>
-            <Text>R$ {list.price}</Text>
-            <ListItem.Chevron />
-          </ListItem>
-        ))}
+        {lists.length > 0 ? (
+          lists.map((list, index) => (
+            <ListItem
+              key={index}
+              onPress={() => navigation.navigate('GroceryList', { id: list.id })}
+              onLongPress={() => toggleOverlayMenu(list.id)}
+              bottomDivider
+            >
+              <ListItem.Content>
+                <ListItem.Title style={styles.listTitle}>{list.title}</ListItem.Title>
+                <ListItem.Subtitle>{list.quantity} items</ListItem.Subtitle>
+                <ListItem.Subtitle>{formatDate(list.createdAt)}</ListItem.Subtitle>
+              </ListItem.Content>
+              <Text>R$ {list.price}</Text>
+              <ListItem.Chevron />
+            </ListItem>
+          ))
+        ) : (
+          <View>
+            <Text>Nenhuma lista encontrada</Text>
+          </View>
+        )}
       </ScrollView>
 
-      <Overlay isVisible={visibleCreate} onBackdropPress={toggleOverlayCreate}>
-        <Input label="Nome" placeholder="Nome" onChangeText={(text) => setNameList(text)} />
+      <Overlay
+        isVisible={visibleCreate}
+        onBackdropPress={toggleOverlayCreate}
+        overlayStyle={styles.overlay}
+      >
+        <Input label="Nome" placeholder="Nome" onChangeText={(text) => setTitle(text)} />
 
         <TouchableOpacity style={styles.button} onPress={handlerCreate}>
           <Text style={styles.buttonText}>Criar</Text>
         </TouchableOpacity>
       </Overlay>
 
+      <Overlay
+        isVisible={visibleMenu}
+        onBackdropPress={toggleOverlayMenu}
+        overlayStyle={styles.overlay}
+      >
+        <ListItem onPress={toggleOverlayUpdate} bottomDivider>
+          <ListItem.Content>
+            <ListItem.Title>
+              <Icon name="edit" size={20} color="black" />
+              Editar
+            </ListItem.Title>
+          </ListItem.Content>
+        </ListItem>
+        <ListItem onPress={handlerDelete}>
+          <ListItem.Content>
+            <ListItem.Title>
+              <Icon name="trash" size={20} color="black" />
+              Excluir
+            </ListItem.Title>
+          </ListItem.Content>
+        </ListItem>
+      </Overlay>
+
       <View style={styles.footer}>
-        <Text style={styles.link}>Perfil</Text>
+        <Text style={styles.link} onPress={signOut}>
+          Perfil
+        </Text>
         <TouchableOpacity style={styles.floatButton} onPress={toggleOverlayCreate}>
           <Icon name="plus" size={20} color="rgb(248, 110, 69)" />
         </TouchableOpacity>
@@ -135,13 +176,27 @@ const ListOfLists = ({ navigation }) => {
 
 export default ListOfLists;
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
-    height: '100%',
+    height: height - 60,
+    width: width,
+  },
+  notification: {
+    zIndex: 2,
+    backgroundColor: 'rgb(250, 142, 112)',
+    margin: 10,
+    padding: 20,
+    borderRadius: 10,
+    position: 'absolute',
+    right: 0,
+  },
+  notificationText: {
+    color: 'rgb(255, 255, 255)',
   },
   scroll: {
     height: 460,
-    backgroundColor: 'rgba(0,0,0)',
     marginBottom: 100,
   },
   listTitle: {
@@ -151,7 +206,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     backgroundColor: 'rgb(248, 110, 69)',
-    width: 'fill-available',
+    width: width - 40,
     padding: 15,
     margin: 20,
     borderRadius: 15,
@@ -161,6 +216,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
     bottom: 0,
+    zIndex: 1,
   },
   link: {
     color: 'rgb(245, 245, 245)',
@@ -168,7 +224,6 @@ const styles = StyleSheet.create({
   },
   floatButton: {
     backgroundColor: 'rgb(245, 245, 245)',
-    width: 'fit-content',
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 18,
@@ -183,5 +238,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'rgb(255, 255, 255)',
     fontSize: 16,
+  },
+  overlay: {
+    width: width / 2,
+  },
+  labelMenu: {
+    marginLeft: 20,
   },
 });
