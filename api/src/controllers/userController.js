@@ -1,8 +1,32 @@
 const { v4: uuid } = require('uuid');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const salt = bcrypt.genSaltSync(10);
 
 const userRepository = require('../repositories/userRepository');
+
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (email == undefined || password == undefined)
+    res.status(400).json({ message: 'Please send email and password' });
+
+  const user = await userRepository.findByEmail(email);
+
+  if (typeof user != 'object') res.status(400).json({ message: 'Something went wrong' });
+  if (!bcrypt.compareSync(password, user.password))
+    res.status(400).json({ message: 'Email or password incorrect' });
+
+  jwt.sign(
+    { name: user.name, email: user.email },
+    's3cr3t',
+    { expiresIn: '1d' },
+    (err, token) => {
+      if (err) res.status(400).json({ message: 'Internal error' });
+      else res.status(200).json({ token, user: { name: user.name, email: user.email } });
+    }
+  );
+};
 
 const getAll = async (req, res) => {
   const users = await userRepository.findAll();
@@ -26,4 +50,4 @@ const create = async (req, res) => {
   else res.status(500).json({ message: 'Something went wrong' });
 };
 
-module.exports = { getAll, create };
+module.exports = { login, getAll, create };

@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { ListItem, Text, Overlay, Input, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import styles from '../stylesLists';
+//import styles from '../stylesLists';
 
 const GroceryList = ({ navigation, route }) => {
   // id da lista selecionada
@@ -176,13 +176,13 @@ const GroceryList = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       {findList() ? (
         findList().items.map((item, index) => (
           <ListItem key={index} onLongPress={() => toggleOverlayMenu(item.id)} bottomDivider>
-            <ListItem.Content style={styles.listContent}>
-              <Text style={styles.quantity}>{item.quantity}</Text>
-              <Text style={styles.name}>{item.name}</Text>
+            <ListItem.Content>
+              <Text>{item.quantity}</Text>
+              <Text>{item.name}</Text>
             </ListItem.Content>
             <Text>R$ {item.price}</Text>
           </ListItem>
@@ -254,7 +254,7 @@ const GroceryList = ({ navigation, route }) => {
         </ListItem>
       </Overlay>
 
-      <TouchableOpacity style={styles.buttonFloat} onPress={toggleOverlayCreate}>
+      <TouchableOpacity onPress={toggleOverlayCreate}>
         <Icon name="plus" size={20} color="#f2f2f2" />
       </TouchableOpacity>
     </View>

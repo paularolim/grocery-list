@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { ListItem, Text, Overlay, Input, Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import styles from '../stylesLists';
+import AuthContext from '../../contexts/authContext';
 
 const ListOfLists = ({ navigation }) => {
+  const { signOut } = useContext(AuthContext);
   // estado com o nome inicial da lista
   const [nameList, setNameList] = useState('');
 
@@ -91,7 +92,7 @@ const ListOfLists = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       {lists.map((list, index) => (
         <ListItem
           key={index}
@@ -107,6 +108,8 @@ const ListOfLists = ({ navigation }) => {
           <ListItem.Chevron />
         </ListItem>
       ))}
+
+      <Text onPress={signOut}>Sair</Text>
 
       <Overlay isVisible={visibleMenu} onBackdropPress={toggleOverlayMenu}>
         <ListItem onPress={toggleOverlayUpdate} bottomDivider>
@@ -142,7 +145,7 @@ const ListOfLists = ({ navigation }) => {
         <Button title="Atualizar" onPress={handlerUpdate} />
       </Overlay>
 
-      <TouchableOpacity style={styles.buttonFloat} onPress={toggleOverlayCreate}>
+      <TouchableOpacity onPress={toggleOverlayCreate}>
         <Icon name="plus" size={20} color="#f2f2f2" />
       </TouchableOpacity>
     </View>
