@@ -3,7 +3,13 @@ import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+import api from '../../services/api';
+
 const Register = ({ navigation }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   const [passwordVisibility, setPasswordVisibility] = useState(true);
   const [passwordIcon, setPasswordIcon] = useState('eye-outline');
 
@@ -12,19 +18,37 @@ const Register = ({ navigation }) => {
     setPasswordIcon(passwordIcon == 'eye-outline' ? 'eye-off-outline' : 'eye-outline');
   };
 
+  const handlerRegister = async () => {
+    try {
+      await api.post('/users', { name, email, password });
+      navigation.navigate('Login');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Nome</Text>
-      <TextInput placeholder="Nome" style={styles.input} />
+      <TextInput
+        placeholder="Nome"
+        onChangeText={(text) => setName(text)}
+        style={styles.input}
+      />
 
       <Text style={styles.label}>Email</Text>
-      <TextInput placeholder="Email" style={styles.input} />
+      <TextInput
+        placeholder="Email"
+        onChangeText={(text) => setEmail(text)}
+        style={styles.input}
+      />
 
       <Text style={styles.label}>Senha</Text>
       <View style={[styles.input, styles.inputWithIcon]}>
         <TextInput
           placeholder="*********"
           secureTextEntry={passwordVisibility}
+          onChangeText={(text) => setPassword(text)}
           style={{ flex: 1 }}
         />
         <Ionicons
@@ -35,7 +59,7 @@ const Register = ({ navigation }) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handlerRegister}>
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
     </View>

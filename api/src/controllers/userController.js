@@ -37,10 +37,15 @@ const getAll = async (req, res) => {
 };
 
 const create = async (req, res) => {
+  const { name, email } = req.body;
+
+  const fetchedUser = await userRepository.findByEmail(email);
+  if (typeof fetchedUser == 'object') res.status(400).json({ message: 'User already exists' });
+
   const user = {
     id: uuid(),
-    name: req.body.name,
-    email: req.body.email,
+    name,
+    email,
     password: bcrypt.hashSync(req.body.password, salt),
     createdAt: Date.now(),
   };
