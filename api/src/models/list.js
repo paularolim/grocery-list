@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   class List extends Model {
     static associate(models) {
       List.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+      List.hasMany(models.Item, { foreignKey: 'listId' });
     }
   }
   List.init(

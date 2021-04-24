@@ -1,241 +1,222 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { ListItem, Text, Overlay, Input, Button } from 'react-native-elements';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
+import { ListItem, Text, Overlay, Input, CheckBox } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-//import styles from '../stylesLists';
+import api from '../../services/api';
+
+import styles from '../_styles/lists';
 
 const GroceryList = ({ navigation, route }) => {
-  // id da lista selecionada
-  const id = route.params.id;
+  const listId = route.params.listId;
 
-  // estados com os dados iniciais do item (produto)
-  const [product, setProduct] = useState('');
+  const [title, setTitle] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [unit, setUnit] = useState('un');
   const [price, setPrice] = useState(0.0);
 
-  // estados com a visibilidade dos modais
   const [visibleCreate, setVisibleCreate] = useState(false);
   const [visibleUpdate, setVisibleUpdate] = useState(false);
   const [visibleMenu, setVisibleMenu] = useState(false);
 
-  // estado com o id do produto selecionado "onLongPress"
-  const [activedProduct, setActivedProduct] = useState(0);
+  const [notification, setNotification] = useState('');
 
-  // estado com a lista de listas
-  const [lists, setLists] = useState([
-    {
-      id: 123,
-      items: [
-        {
-          id: 111,
-          name: 'Manteiga 500g',
-          quantity: 1,
-          price: 5.89,
-        },
-        {
-          id: 222,
-          name: 'Farinha 1Kg',
-          quantity: 3,
-          price: 4.76,
-        },
-      ],
-    },
-    {
-      id: 456,
-      items: [
-        {
-          id: 333,
-          name: 'Escova de dentes 1un',
-          quantity: 1,
-          price: 3.98,
-        },
-        {
-          id: 444,
-          name: 'Creme dental menta',
-          quantity: 4,
-          price: 2.78,
-        },
-        {
-          id: 555,
-          name: 'Enxaguante bucal',
-          quantity: 1,
-          price: 9.68,
-        },
-      ],
-    },
-  ]);
+  const [activedItem, setActivedItem] = useState({});
 
-  // função para limpar o item no estado
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    getItems();
+  }, []);
+
+  const getItems = async () => {
+    console.log(`getting items from database`);
+    try {
+      const response = await api.get(`/lists/${listId}/items`);
+      setItems(response.data);
+    } catch (err) {
+      setItems([]);
+    }
+  };
+
   const cleanState = () => {
-    setProduct('');
+    setTitle('');
     setQuantity(1);
     setPrice(0.0);
   };
 
-  // função que retorna a lista selecionada
-  const findList = () => {
-    let fetchedList;
-
-    lists.forEach((list) => {
-      if (list.id == id) fetchedList = list;
-    });
-
-    return fetchedList ? fetchedList : null;
-  };
-
-  // função para trocar a visibilidade do modal de criação
   const toggleOverlayCreate = () => {
     setVisibleCreate(!visibleCreate);
   };
 
-  // função para mostrar o modal de update
-  // e colocar os dados nos campos
   const toggleOverlayUpdate = () => {
+    setTitle(activedItem.title);
+    setQuantity(activedItem.quantity);
+    setPrice(activedItem.price);
+
     setVisibleMenu(!visibleMenu);
     setVisibleUpdate(!visibleUpdate);
-
-    let fetchedList;
-    lists.forEach((list) => {
-      if (list.id == id) fetchedList = list;
-    });
-    fetchedList.items.forEach((item) => {
-      if (item.id == activedProduct) {
-        setProduct(item.name);
-        setQuantity(item.quantity);
-        setPrice(item.price);
-      }
-    });
   };
 
-  // função para mostrar o menu (editar/excluir)
-  const toggleOverlayMenu = (id) => {
-    setActivedProduct(id);
+  const toggleOverlayMenu = (item) => {
+    setActivedItem(item);
     setVisibleMenu(!visibleMenu);
   };
 
-  // função para criar um item em uma lista
-  const handlerCreate = () => {
-    const newProduct = {
-      id: Math.floor(Math.random() * 9999),
-      name: product,
-      quantity: parseInt(quantity),
-      price: parseFloat(price),
-    };
+  const handlerCreate = async () => {
+    try {
+      console.log(`creating item`);
+      await api.post(`/lists/${listId}/items`, { title, quantity, unit, price });
 
-    let listExists = false;
-    lists.forEach((list) => {
-      if (list.id == id) {
-        listExists = true;
-        list.items.push(newProduct);
-      }
-    });
+      toggleOverlayCreate();
+      cleanState();
+      getItems();
 
-    // se a lista não estiver no array, é criada uma nova lista
-    if (!listExists) {
-      lists.push({
-        id: id,
-        items: [newProduct],
-      });
+      sendNotification('Item criado');
+    } catch (err) {
+      sendNotification('Revise as informações');
     }
-
-    setLists(lists);
-    cleanState();
   };
 
-  // função para atualizar o item de uma lista
-  const handlerUpdate = () => {
-    setVisibleUpdate(!visibleUpdate);
-
-    let fetchedList;
-    lists.forEach((list) => {
-      if (list.id == id) fetchedList = list;
-    });
-    fetchedList.items.forEach((item) => {
-      if (item.id == activedProduct) {
-        item.name = product;
-        item.quantity = quantity;
-        item.price = price;
-      }
-    });
-
-    setLists(lists);
+  const handlerUpdate = async () => {
+    try {
+      console.log(`Updating item`);
+      await api.put(`/lists/${listId}/items/${activedItem.id}`, { title, quantity, price });
+      cleanState();
+      getItems();
+      setVisibleUpdate(!visibleUpdate);
+      sendNotification('Item atualizado');
+    } catch (err) {
+      sendNotification('Revise as informações');
+    }
   };
 
-  // função para deletar o item de uma lista
-  const handlerDelete = () => {
+  const handlerCheck = async (itemId) => {
+    try {
+      console.log(`Check/Uncheck item`);
+      await api.put(`/lists/${listId}/items/${itemId}/check`);
+      getItems();
+      sendNotification('O item foi marcado/desmarcado');
+    } catch (err) {
+      console.log(err);
+      sendNotification('Não foi possivel marcar/desmarcar o item');
+    }
+  };
+
+  const handlerDelete = async () => {
     setVisibleMenu(!visibleMenu);
 
-    lists.forEach((list) => {
-      if (list.id == id) {
-        list.items = list.items.filter((item) => item.id != activedProduct);
-      }
-    });
+    try {
+      console.log(`Deleting item`);
+      await api.delete(`/lists/${listId}/items/${activedItem.id}`);
+      getItems();
+      sendNotification('O item foi deletado');
+    } catch (err) {
+      sendNotification('Não foi possivel deletar o item');
+    }
+  };
 
-    setLists(lists);
+  const sendNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => {
+      setNotification('');
+    }, 2000);
   };
 
   return (
-    <View>
-      {findList() ? (
-        findList().items.map((item, index) => (
-          <ListItem key={index} onLongPress={() => toggleOverlayMenu(item.id)} bottomDivider>
-            <ListItem.Content>
-              <Text>{item.quantity}</Text>
-              <Text>{item.name}</Text>
-            </ListItem.Content>
-            <Text>R$ {item.price}</Text>
-          </ListItem>
-        ))
+    <View style={styles.container}>
+      {notification != '' ? (
+        <View style={styles.notification}>
+          <Text style={styles.notificationText}>{notification}</Text>
+        </View>
       ) : (
-        <Text>Nenhum item na lista</Text>
+        <></>
       )}
 
-      <Overlay isVisible={visibleCreate} onBackdropPress={toggleOverlayCreate}>
+      <ScrollView style={styles.scroll}>
+        {items.length > 0 ? (
+          items.map((item, index) => (
+            <ListItem key={index} onLongPress={() => toggleOverlayMenu(item)} bottomDivider>
+              <CheckBox
+                checked={item.bought}
+                checkedColor="rgb(248, 110, 69)"
+                onPress={() => handlerCheck(item.id)}
+              />
+              <ListItem.Content>
+                <ListItem.Title style={styles.listTitle}>{item.title}</ListItem.Title>
+                <ListItem.Subtitle>R$ {item.price.toFixed(2)}</ListItem.Subtitle>
+              </ListItem.Content>
+              <Text style={styles.itemQuantity}>{item.quantity}</Text>
+            </ListItem>
+          ))
+        ) : (
+          <Text>Nenhum item na lista</Text>
+        )}
+      </ScrollView>
+
+      <Overlay
+        isVisible={visibleCreate}
+        onBackdropPress={toggleOverlayCreate}
+        overlayStyle={styles.overlay}
+      >
         <Input
-          label="Produto"
-          placeholder="Produto"
-          value={product}
-          onChangeText={(text) => setProduct(text)}
+          label="Nome"
+          placeholder="Nome"
+          value={title}
+          onChangeText={(text) => setTitle(text)}
         />
         <Input
           label="Quantidade"
           placeholder="Quantidade"
-          value={quantity}
+          value={quantity.toString()}
           onChangeText={(text) => setQuantity(text)}
         />
         <Input
           label="Preço"
           placeholder="Preço"
-          value={price}
+          value={price.toString()}
           onChangeText={(text) => setPrice(text)}
         />
-        <Button title="Criar" onPress={handlerCreate} />
+
+        <TouchableOpacity style={styles.button} onPress={handlerCreate}>
+          <Text style={styles.buttonText}>Criar</Text>
+        </TouchableOpacity>
       </Overlay>
 
-      <Overlay isVisible={visibleUpdate} onBackdropPress={toggleOverlayUpdate}>
+      <Overlay
+        isVisible={visibleUpdate}
+        onBackdropPress={toggleOverlayUpdate}
+        overlayStyle={styles.overlay}
+      >
         <Input
-          label="Produto"
-          placeholder="Produto"
-          value={product}
-          onChangeText={(text) => setProduct(text)}
+          label="Nome"
+          placeholder="Nome"
+          value={title}
+          onChangeText={(text) => setTitle(text)}
         />
         <Input
           label="Quantidade"
           placeholder="Quantidade"
-          value={quantity}
+          value={quantity.toString()}
           onChangeText={(text) => setQuantity(text)}
         />
         <Input
           label="Preço"
           placeholder="Preço"
-          value={price}
+          value={price.toString()}
           onChangeText={(text) => setPrice(text)}
         />
-        <Button title="Atualizar" onPress={handlerUpdate} />
+
+        <TouchableOpacity style={styles.button} onPress={handlerUpdate}>
+          <Text style={styles.buttonText}>Atualizar</Text>
+        </TouchableOpacity>
       </Overlay>
 
-      <Overlay isVisible={visibleMenu} onBackdropPress={toggleOverlayMenu}>
+      <Overlay
+        isVisible={visibleMenu}
+        onBackdropPress={toggleOverlayMenu}
+        overlayStyle={styles.overlay}
+      >
         <ListItem onPress={toggleOverlayUpdate} bottomDivider>
           <ListItem.Content>
             <ListItem.Title>
@@ -254,9 +235,12 @@ const GroceryList = ({ navigation, route }) => {
         </ListItem>
       </Overlay>
 
-      <TouchableOpacity onPress={toggleOverlayCreate}>
-        <Icon name="plus" size={20} color="#f2f2f2" />
-      </TouchableOpacity>
+      <View style={styles.footer}>
+        <Text style={styles.link}>Total: R$ 100,00</Text>
+        <TouchableOpacity style={styles.floatButton} onPress={toggleOverlayCreate}>
+          <Icon name="plus" size={20} color="rgb(248, 110, 69)" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
