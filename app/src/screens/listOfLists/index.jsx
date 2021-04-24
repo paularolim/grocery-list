@@ -17,7 +17,7 @@ const ListOfLists = ({ navigation }) => {
 
   const [notification, setNotification] = useState('');
 
-  const [activedList, setActivedList] = useState(0);
+  const [activedList, setActivedList] = useState({});
 
   const [lists, setLists] = useState([]);
 
@@ -38,6 +38,7 @@ const ListOfLists = ({ navigation }) => {
   };
 
   const toggleOverlayUpdate = () => {
+    setTitle(activedList.title);
     setVisibleMenu(!visibleMenu);
     setVisibleUpdate(!visibleUpdate);
   };
@@ -61,7 +62,17 @@ const ListOfLists = ({ navigation }) => {
     toggleOverlayCreate();
   };
 
-  const handlerUpdate = () => {
+  const handlerUpdate = async () => {
+    try {
+      console.log(`Updating list`);
+      await api.put(`/users/${user.id}/lists/${activedList.id}`, { title });
+      setTitle('');
+      getLists();
+      sendNotification('Lista atualizada');
+    } catch (err) {
+      sendNotification('Revise as informações');
+    }
+
     setVisibleUpdate(!visibleUpdate);
   };
 
@@ -70,9 +81,7 @@ const ListOfLists = ({ navigation }) => {
 
     try {
       console.log(`Deleting list`);
-      const url = `/users/${user.id}/lists/${activedList}`;
-      console.log(url);
-      await api.delete(url);
+      await api.delete(`/users/${user.id}/lists/${activedList.id}`);
       getLists();
       sendNotification('A lista foi deletada');
     } catch (err) {
@@ -108,7 +117,7 @@ const ListOfLists = ({ navigation }) => {
             <ListItem
               key={index}
               onPress={() => navigation.navigate('GroceryList', { id: list.id })}
-              onLongPress={() => toggleOverlayMenu(list.id)}
+              onLongPress={() => toggleOverlayMenu(list)}
               bottomDivider
             >
               <ListItem.Content>
@@ -136,6 +145,22 @@ const ListOfLists = ({ navigation }) => {
 
         <TouchableOpacity style={styles.button} onPress={handlerCreate}>
           <Text style={styles.buttonText}>Criar</Text>
+        </TouchableOpacity>
+      </Overlay>
+
+      <Overlay
+        isVisible={visibleUpdate}
+        onBackdropPress={toggleOverlayUpdate}
+        overlayStyle={styles.overlay}
+      >
+        <Input
+          label="Nome"
+          placeholder="Nome"
+          value={title}
+          onChangeText={(text) => setTitle(text)}
+        />
+        <TouchableOpacity style={styles.button} onPress={handlerUpdate}>
+          <Text style={styles.buttonText}>Atualizar</Text>
         </TouchableOpacity>
       </Overlay>
 

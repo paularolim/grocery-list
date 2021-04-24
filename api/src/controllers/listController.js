@@ -31,6 +31,27 @@ const create = async (req, res) => {
   else res.status(500).json({ message: 'Something went wrong' });
 };
 
+const update = async (req, res) => {
+  const { listId } = req.params;
+  const { title } = req.body;
+  const updatedAt = Date.now();
+
+  if (title == '') {
+    res.status(400).json({ message: 'Please send a title' });
+    return;
+  }
+
+  const list = await listRepository.getOne(listId);
+
+  if (typeof list == 'object') {
+    await listRepository.edit(list.id, { title, updatedAt });
+    res.status(200).json({ message: `List with id ${list.id} was updated` });
+    return;
+  } else {
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
 const destroy = async (req, res) => {
   const { listId } = req.params;
 
@@ -45,4 +66,4 @@ const destroy = async (req, res) => {
   }
 };
 
-module.exports = { getAll, create, destroy };
+module.exports = { getAll, create, update, destroy };

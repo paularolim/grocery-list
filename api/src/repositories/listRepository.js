@@ -21,10 +21,16 @@ const save = (data) => {
     .catch((err) => err);
 };
 
+const edit = (id, data) => {
+  return models.List.update(data, { where: { id } })
+    .then(() => true)
+    .catch((err) => err);
+};
+
 const remove = (id) => {
   return models.List.destroy({ where: { id } })
     .then(() => true)
     .catch((err) => err);
 };
 
-module.exports = { getAll, getOne, save, remove };
+module.exports = { getAll, getOne, save, edit, remove };

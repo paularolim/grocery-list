@@ -11,5 +11,6 @@ router.post('/users', userController.create);
 router.get('/users/:userId/lists', listController.getAll);
 router.post('/users/:userId/lists', listController.create);
 router.delete('/users/:userId/lists/:listId', listController.destroy);
+router.put('/users/:userId/lists/:listId', listController.update);
 
 module.exports = router;
