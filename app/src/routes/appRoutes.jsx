@@ -3,6 +3,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import ListOfLists from '../screens/listOfLists';
 import GroceryList from '../screens/groceryList';
+import Profile from '../screens/profile';
+import About from '../screens/about';
 
 const AuthStack = createStackNavigator();
 
@@ -24,6 +26,16 @@ const AuthRoutes = () => {
         name="GroceryList"
         component={GroceryList}
         options={Object.assign({}, headerOptions, { headerTitle: 'Lista' })}
+      />
+      <AuthStack.Screen
+        name="Profile"
+        component={Profile}
+        options={Object.assign({}, headerOptions, { headerTitle: 'Meu perfil' })}
+      />
+      <AuthStack.Screen
+        name="About"
+        component={About}
+        options={Object.assign({}, headerOptions, { headerTitle: 'Sobre' })}
       />
     </AuthStack.Navigator>
   );

@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import api from '../../services/api';
 
-import styles from '../_styles/lists';
+import styles from '../styles/lists';
 
 const GroceryList = ({ navigation, route }) => {
   const listId = route.params.listId;

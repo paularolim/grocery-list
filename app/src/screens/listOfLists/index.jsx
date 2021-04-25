@@ -6,10 +6,10 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import AuthContext from '../../contexts/authContext';
 import api from '../../services/api';
 
-import styles from '../_styles/lists';
+import styles from '../styles/lists';
 
 const ListOfLists = ({ navigation }) => {
-  const { user, signOut } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const [title, setTitle] = useState('');
 
@@ -192,8 +192,8 @@ const ListOfLists = ({ navigation }) => {
       </Overlay>
 
       <View style={styles.footer}>
-        <Text style={styles.link} onPress={signOut}>
-          Perfil
+        <Text style={styles.link} onPress={() => navigation.navigate('Profile')}>
+          {user.name}
         </Text>
         <TouchableOpacity style={styles.floatButton} onPress={toggleOverlayCreate}>
           <Icon name="plus" size={20} color="rgb(248, 110, 69)" />
