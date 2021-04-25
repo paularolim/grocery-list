@@ -16,7 +16,7 @@ const getOne = (id) => {
 };
 
 const count = (listId) => {
-  return models.Item.count({ where: { listId } })
+  return models.Item.sum('quantity', { where: { listId } })
     .then((c) => c)
     .catch((err) => err);
 };
