@@ -24,8 +24,11 @@ const ListOfLists = ({ navigation }) => {
   const [lists, setLists] = useState([]);
 
   useEffect(() => {
-    getLists();
-  }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      getLists();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const getLists = async () => {
     console.log(`getting lists from database`);
@@ -56,12 +59,11 @@ const ListOfLists = ({ navigation }) => {
       await api.post(`/users/${user.id}/lists`, { title });
       setTitle('');
       getLists();
+      toggleOverlayCreate();
       sendNotification('Lista criada');
     } catch (err) {
       sendNotification('Revise as informações');
     }
-
-    toggleOverlayCreate();
   };
 
   const handlerUpdate = async () => {
@@ -124,10 +126,10 @@ const ListOfLists = ({ navigation }) => {
             >
               <ListItem.Content>
                 <ListItem.Title style={styles.listTitle}>{list.title}</ListItem.Title>
-                <ListItem.Subtitle>{list.quantity} items</ListItem.Subtitle>
+                <ListItem.Subtitle>{list.itemsQuantity} items</ListItem.Subtitle>
                 <ListItem.Subtitle>{formatDate(list.createdAt)}</ListItem.Subtitle>
               </ListItem.Content>
-              <Text>R$ {list.price}</Text>
+              <Text>R$ {list.total.toFixed(2)}</Text>
               <ListItem.Chevron />
             </ListItem>
           ))

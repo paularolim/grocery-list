@@ -7,9 +7,13 @@ const getAll = async (req, res) => {
 
   const items = await itemRepository.getAll(listId);
 
-  if (items) res.status(200).json(items);
-  else if (items == undefined)
-    res.status(404).json({ message: `This list haven't items already` });
+  if (items) {
+    const itemsQuantity = await itemRepository.count(listId);
+    const total = await itemRepository.total(listId);
+
+    res.status(200).json({ items, itemsQuantity, total });
+  } else if (items == undefined)
+    res.status(404).json({ items: [], itemsQuantity: 0, total: 0 });
   else res.status(500).json({ message: 'Something went wrong' });
 };
 

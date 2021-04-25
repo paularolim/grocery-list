@@ -23,7 +23,7 @@ const GroceryList = ({ navigation, route }) => {
 
   const [activedItem, setActivedItem] = useState({});
 
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState({ items: [], itemsQuantity: 0, total: 0 });
 
   useEffect(() => {
     getItems();
@@ -35,7 +35,7 @@ const GroceryList = ({ navigation, route }) => {
       const response = await api.get(`/lists/${listId}/items`);
       setItems(response.data);
     } catch (err) {
-      setItems([]);
+      setItems({ items: [], itemsQuantity: 0, total: 0 });
     }
   };
 
@@ -134,8 +134,8 @@ const GroceryList = ({ navigation, route }) => {
       )}
 
       <ScrollView style={styles.scroll}>
-        {items.length > 0 ? (
-          items.map((item, index) => (
+        {items.items.length > 0 ? (
+          items.items.map((item, index) => (
             <ListItem key={index} onLongPress={() => toggleOverlayMenu(item)} bottomDivider>
               <CheckBox
                 checked={item.bought}
@@ -236,7 +236,9 @@ const GroceryList = ({ navigation, route }) => {
       </Overlay>
 
       <View style={styles.footer}>
-        <Text style={styles.link}>Total: R$ 100,00</Text>
+        <Text style={styles.link}>
+          R$ {items.total.toFixed(2)} / {items.itemsQuantity} itens
+        </Text>
         <TouchableOpacity style={styles.floatButton} onPress={toggleOverlayCreate}>
           <Icon name="plus" size={20} color="rgb(248, 110, 69)" />
         </TouchableOpacity>

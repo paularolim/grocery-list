@@ -1,14 +1,22 @@
 const { v4: uuid } = require('uuid');
 
 const listRepository = require('../repositories/listRepository');
+const itemRepository = require('../repositories/itemRepository');
 
 const getAll = async (req, res) => {
   const { userId } = req.params;
 
   const lists = await listRepository.getAll(userId);
 
-  if (lists) res.status(200).json(lists);
-  else if (lists == undefined)
+  if (lists) {
+    const promises = lists.map(async (list) => {
+      list.dataValues.itemsQuantity = await itemRepository.count(list.id);
+      list.dataValues.total = await itemRepository.total(list.id);
+    });
+    await Promise.all(promises);
+
+    res.status(200).json(lists);
+  } else if (lists == undefined)
     res.status(404).json({ message: `This user haven't lists already` });
   else res.status(500).json({ message: 'Something went wrong' });
 };

@@ -15,6 +15,27 @@ const getOne = (id) => {
     .catch((err) => err);
 };
 
+const count = (listId) => {
+  return models.Item.count({ where: { listId } })
+    .then((c) => c)
+    .catch((err) => err);
+};
+
+const total = async (listId) => {
+  let subtotal = 0;
+
+  await models.Item.findAll({ where: { listId } })
+    .then(async (items) => {
+      const promises = items.map((item) => {
+        subtotal += item.quantity * item.price;
+      });
+      await Promise.all(promises);
+    })
+    .catch((err) => err);
+
+  return subtotal;
+};
+
 const save = (data) => {
   return models.Item.create(data)
     .then(() => true)
@@ -33,4 +54,4 @@ const remove = (id) => {
     .catch((err) => err);
 };
 
-module.exports = { getAll, getOne, save, edit, remove };
+module.exports = { getAll, getOne, count, total, save, edit, remove };
