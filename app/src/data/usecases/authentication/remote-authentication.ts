@@ -8,13 +8,10 @@ import { AuthenticationParams } from '@domain/usecases/autentication';
 export class RemoteAuthentication {
   constructor(
     private readonly url: string,
-    private readonly httpClient: HttpPostClient<
-    AuthenticationParams,
-    AccountModel
-    >,
+    private readonly httpClient: HttpPostClient<AuthenticationParams, AccountModel>,
   ) {}
 
-  async auth(params: AuthenticationParams): Promise<void> {
+  async auth(params: AuthenticationParams): Promise<AccountModel> {
     const httpResponse = await this.httpClient.post({
       url: this.url,
       body: params,
@@ -22,7 +19,7 @@ export class RemoteAuthentication {
 
     switch (httpResponse.statusCode) {
       case HttpStatusCode.ok:
-        return Promise.resolve();
+        return httpResponse.body;
 
       case HttpStatusCode.unauthorized:
         throw new InvalidCredentialsError();
