@@ -4,12 +4,10 @@ import { View, ActivityIndicator } from 'react-native';
 import { AuthRoutes } from './authRoutes';
 import { AppRoutes } from './appRoutes';
 
-import authContext from '../contexts/authContext';
+import { AuthContext } from '../contexts/authContext';
 
 function Routes() {
-  const { loading, signed } = useContext(authContext);
-
-  console.log('aquiii');
+  const { loading, signed } = useContext(AuthContext);
 
   if (loading) {
     return (

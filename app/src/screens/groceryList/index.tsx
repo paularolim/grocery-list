@@ -46,6 +46,7 @@ export function GroceryList({ route }: StackScreenProps<ParamListBase, any>) {
   };
 
   const getItems = async () => {
+    // eslint-disable-next-line no-console
     console.log('getting items from database');
     try {
       const response = await api.get(`/lists/${listId}/items`);
@@ -81,6 +82,7 @@ export function GroceryList({ route }: StackScreenProps<ParamListBase, any>) {
 
   const handlerCreate = async () => {
     try {
+      // eslint-disable-next-line no-console
       console.log('creating item');
       await api.post(`/lists/${listId}/items`, {
         title,
@@ -101,6 +103,7 @@ export function GroceryList({ route }: StackScreenProps<ParamListBase, any>) {
 
   const handlerUpdate = async () => {
     try {
+      // eslint-disable-next-line no-console
       console.log('Updating item');
       await api.put(`/lists/${listId}/items/${activedItem.id}`, {
         title,
@@ -118,11 +121,13 @@ export function GroceryList({ route }: StackScreenProps<ParamListBase, any>) {
 
   const handlerCheck = async (itemId) => {
     try {
+      // eslint-disable-next-line no-console
       console.log('Check/Uncheck item');
       await api.put(`/lists/${listId}/items/${itemId}/check`);
       getItems();
       sendNotification('O item foi marcado/desmarcado');
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.log(err);
       sendNotification('Não foi possivel marcar/desmarcar o item');
     }
@@ -132,6 +137,7 @@ export function GroceryList({ route }: StackScreenProps<ParamListBase, any>) {
     setVisibleMenu(!visibleMenu);
 
     try {
+      // eslint-disable-next-line no-console
       console.log('Deleting item');
       await api.delete(`/lists/${listId}/items/${activedItem.id}`);
       getItems();
@@ -284,13 +290,7 @@ export function GroceryList({ route }: StackScreenProps<ParamListBase, any>) {
 
       <View style={styles.footer}>
         <Text style={styles.link}>
-          `R$ $
-          {items.total.toFixed(2)}
-          {' '}
-          /$
-          {items.itemsQuantity}
-          {' '}
-          itens`
+          {`R$ ${items.total.toFixed(2)} / ${items.itemsQuantity} itens`}
         </Text>
         <TouchableOpacity
           style={styles.floatButton}

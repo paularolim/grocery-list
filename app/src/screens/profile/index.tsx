@@ -8,7 +8,7 @@ import { AuthContext } from '../../contexts/authContext';
 
 import styles from '../styles/profile';
 
-function Profile({ navigation }: StackScreenProps<ParamListBase, any>) {
+export function Profile({ navigation }: StackScreenProps<ParamListBase, any>) {
   const { user, signOut } = useContext(AuthContext);
 
   const getInitial = () => {
@@ -59,5 +59,3 @@ function Profile({ navigation }: StackScreenProps<ParamListBase, any>) {
     </View>
   );
 }
-
-export default Profile;

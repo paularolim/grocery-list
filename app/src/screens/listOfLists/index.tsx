@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { ParamListBase } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 import React, { useState, useContext, useEffect } from 'react';
@@ -10,7 +11,7 @@ import api from '../../services/api';
 
 import styles from '../styles/lists';
 
-function ListOfLists({ navigation }: StackScreenProps<ParamListBase, any>) {
+export function ListOfLists({ navigation }: StackScreenProps<ParamListBase, any>) {
   const { user } = useContext(AuthContext);
 
   const [title, setTitle] = useState('');
@@ -21,9 +22,10 @@ function ListOfLists({ navigation }: StackScreenProps<ParamListBase, any>) {
 
   const [notification, setNotification] = useState('');
 
-  const [activedList, setActivedList] = useState<{ title: string } | null>(
-    null,
-  );
+  const [activedList, setActivedList] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const [lists, setLists] = useState([]);
 
@@ -135,20 +137,12 @@ function ListOfLists({ navigation }: StackScreenProps<ParamListBase, any>) {
                 <ListItem.Title style={styles.listTitle}>
                   {list.title}
                 </ListItem.Title>
-                <ListItem.Subtitle>
-                  `$
-                  {list.itemsQuantity}
-                  {' '}
-                  items`
-                </ListItem.Subtitle>
+                <ListItem.Subtitle>{`${list.itemsQuantity} items`}</ListItem.Subtitle>
                 <ListItem.Subtitle>
                   {formatDate(list.createdAt)}
                 </ListItem.Subtitle>
               </ListItem.Content>
-              <Text>
-                R$
-                {list.total.toFixed(2)}
-              </Text>
+              <Text>{`R$ ${list.total.toFixed(2)}`}</Text>
               <ListItem.Chevron />
             </ListItem>
           ))
@@ -242,5 +236,3 @@ function ListOfLists({ navigation }: StackScreenProps<ParamListBase, any>) {
     </View>
   );
 }
-
-export default ListOfLists;

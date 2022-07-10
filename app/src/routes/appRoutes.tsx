@@ -4,9 +4,9 @@ import {
   StackNavigationOptions,
 } from '@react-navigation/stack';
 
-import ListOfLists from '../screens/listOfLists';
+import { ListOfLists } from '../screens/listOfLists';
 import { GroceryList } from '../screens/groceryList';
-import Profile from '../screens/profile';
+import { Profile } from '../screens/profile';
 import { About } from '../screens/about';
 
 const AuthStack = createStackNavigator();

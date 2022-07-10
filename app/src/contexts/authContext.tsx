@@ -71,6 +71,7 @@ function AuthProvider({ children }: AuthProviderProps) {
 
       setUser(response.data.user);
     } catch (Exception) {
+      // eslint-disable-next-line no-console
       console.log(Exception);
     }
   };
