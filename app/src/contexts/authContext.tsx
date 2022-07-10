@@ -1,11 +1,37 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useMemo,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import api from '../services/api';
 
-const AuthContext = createContext({ signed: false, user: {} });
+interface AuthContextProps {
+  loading: boolean;
+  signed: boolean;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  signIn?: (email: string, password: string) => Promise<void>;
+  signOut?: () => Promise<void>;
+}
 
-export const AuthProvider = ({ children }) => {
+const AuthContext = createContext<AuthContextProps>({
+  loading: false,
+  signed: false,
+  user: null,
+});
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -15,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       const storagedUser = await AsyncStorage.getItem('@MeuMercado:user');
 
       if (storagedToken && storagedUser) {
-        api.defaults.headers['Authorization'] = `Bearer ${storagedToken}`;
+        api.defaults.headers.Authorization = `Bearer ${storagedToken}`;
 
         setUser(JSON.parse(storagedUser));
         setLoading(false);
@@ -29,13 +55,19 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      const data = { email, password };
+      const data = {
+        email,
+        password,
+      };
       const response = await api.post('/login', data);
 
-      api.defaults.headers['Authorization'] = `Bearer ${response.data.token}`;
+      api.defaults.headers.Authorization = `Bearer ${response.data.token}`;
 
       await AsyncStorage.setItem('@MeuMercado:token', response.data.token);
-      await AsyncStorage.setItem('@MeuMercado:user', JSON.stringify(response.data.user));
+      await AsyncStorage.setItem(
+        '@MeuMercado:user',
+        JSON.stringify(response.data.user),
+      );
 
       setUser(response.data.user);
     } catch (Exception) {
@@ -49,11 +81,18 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  return (
-    <AuthContext.Provider value={{ loading, signed: Boolean(user), user, signIn, signOut }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      loading,
+      signed: Boolean(user),
+      user,
+      signIn,
+      signOut,
+    }),
+    [loading, user, signIn, signOut],
   );
-};
 
-export default AuthContext;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export { AuthContext, AuthProvider };

@@ -1,11 +1,11 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 
-import { AuthProvider } from "./src/contexts/authContext";
+import { ThemeProvider } from 'styled-components/native';
+import { AuthProvider } from './src/contexts/authContext';
 
-import Routes from "./src/routes/";
-import { ThemeProvider, useTheme } from "styled-components/native";
-import { lightTheme } from "./src/global/theme";
+import Routes from './src/routes';
+import { lightTheme } from './src/global/theme';
 
 export default function App() {
   return (

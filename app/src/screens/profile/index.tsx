@@ -1,12 +1,14 @@
+import { ParamListBase } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
 import React, { useContext } from 'react';
 import { View } from 'react-native';
 import { Avatar, Text, ListItem } from 'react-native-elements';
 
-import AuthContext from '../../contexts/authContext';
+import { AuthContext } from '../../contexts/authContext';
 
 import styles from '../styles/profile';
 
-const Profile = ({ navigation }) => {
+function Profile({ navigation }: StackScreenProps<ParamListBase, any>) {
   const { user, signOut } = useContext(AuthContext);
 
   const getInitial = () => {
@@ -19,20 +21,35 @@ const Profile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Avatar rounded title={getInitial()} size={150} containerStyle={styles.avatar} />
+        <Avatar
+          rounded
+          title={getInitial()}
+          size={150}
+          containerStyle={styles.avatar}
+        />
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.email}>{user.email}</Text>
       </View>
 
       <View style={styles.menu}>
-        <ListItem bottomDivider onPress={() => navigation.navigate('About')}>
+        <ListItem
+          bottomDivider
+          onPress={() => navigation.navigate('About')}
+          hasTVPreferredFocus={undefined}
+          tvParallaxProperties={undefined}
+        >
           <ListItem.Content>
             <ListItem.Title>Sobre o aplicativo</ListItem.Title>
           </ListItem.Content>
           <ListItem.Chevron />
         </ListItem>
 
-        <ListItem bottomDivider onPress={signOut}>
+        <ListItem
+          bottomDivider
+          onPress={signOut}
+          hasTVPreferredFocus={undefined}
+          tvParallaxProperties={undefined}
+        >
           <ListItem.Content>
             <ListItem.Title>Sair</ListItem.Title>
           </ListItem.Content>
@@ -41,6 +58,6 @@ const Profile = ({ navigation }) => {
       </View>
     </View>
   );
-};
+}
 
 export default Profile;

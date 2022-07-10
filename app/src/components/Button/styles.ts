@@ -1,6 +1,6 @@
-import { TouchableOpacity } from "react-native";
-import styled from "styled-components/native";
-import { Text } from "../Text";
+import { TouchableOpacity } from 'react-native';
+import styled from 'styled-components/native';
+import { Text } from '../Text';
 
 export const Container = styled(TouchableOpacity)`
   background-color: ${({ theme }) => theme.primary};
@@ -12,9 +12,7 @@ export const Container = styled(TouchableOpacity)`
 
 export const Label = styled(Text).attrs({
   h4: true,
-  h4Style: {
-    fontWeight: "400",
-  },
+  h4Style: { fontWeight: '400' },
 })`
   color: ${({ theme }) => theme.tertiary};
 `;

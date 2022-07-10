@@ -1,18 +1,26 @@
+import { ParamListBase } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, TouchableOpacity } from 'react-native';
-import { ListItem, Text, Overlay, Input, CheckBox } from 'react-native-elements';
+import {
+  ListItem,
+  Text,
+  Overlay,
+  Input,
+  CheckBox,
+} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import api from '../../services/api';
 
 import styles from '../styles/lists';
 
-const GroceryList = ({ navigation, route }) => {
-  const listId = route.params.listId;
+export function GroceryList({ route }: StackScreenProps<ParamListBase, any>) {
+  const { listId } = route.params;
 
   const [title, setTitle] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [unit, setUnit] = useState('un');
+  const [unit] = useState('un');
   const [price, setPrice] = useState(0.0);
 
   const [visibleCreate, setVisibleCreate] = useState(false);
@@ -21,16 +29,24 @@ const GroceryList = ({ navigation, route }) => {
 
   const [notification, setNotification] = useState('');
 
-  const [activedItem, setActivedItem] = useState({});
+  const [activedItem, setActivedItem] = useState<{
+    id: string;
+    title: string;
+    quantity: number;
+    price: number;
+  } | null>(null);
 
   const [items, setItems] = useState({ items: [], itemsQuantity: 0, total: 0 });
 
-  useEffect(() => {
-    getItems();
-  }, []);
+  const sendNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => {
+      setNotification('');
+    }, 2000);
+  };
 
   const getItems = async () => {
-    console.log(`getting items from database`);
+    console.log('getting items from database');
     try {
       const response = await api.get(`/lists/${listId}/items`);
       setItems(response.data);
@@ -65,8 +81,13 @@ const GroceryList = ({ navigation, route }) => {
 
   const handlerCreate = async () => {
     try {
-      console.log(`creating item`);
-      await api.post(`/lists/${listId}/items`, { title, quantity, unit, price });
+      console.log('creating item');
+      await api.post(`/lists/${listId}/items`, {
+        title,
+        quantity,
+        unit,
+        price,
+      });
 
       toggleOverlayCreate();
       cleanState();
@@ -80,8 +101,12 @@ const GroceryList = ({ navigation, route }) => {
 
   const handlerUpdate = async () => {
     try {
-      console.log(`Updating item`);
-      await api.put(`/lists/${listId}/items/${activedItem.id}`, { title, quantity, price });
+      console.log('Updating item');
+      await api.put(`/lists/${listId}/items/${activedItem.id}`, {
+        title,
+        quantity,
+        price,
+      });
       cleanState();
       getItems();
       setVisibleUpdate(!visibleUpdate);
@@ -93,7 +118,7 @@ const GroceryList = ({ navigation, route }) => {
 
   const handlerCheck = async (itemId) => {
     try {
-      console.log(`Check/Uncheck item`);
+      console.log('Check/Uncheck item');
       await api.put(`/lists/${listId}/items/${itemId}/check`);
       getItems();
       sendNotification('O item foi marcado/desmarcado');
@@ -107,7 +132,7 @@ const GroceryList = ({ navigation, route }) => {
     setVisibleMenu(!visibleMenu);
 
     try {
-      console.log(`Deleting item`);
+      console.log('Deleting item');
       await api.delete(`/lists/${listId}/items/${activedItem.id}`);
       getItems();
       sendNotification('O item foi deletado');
@@ -116,35 +141,42 @@ const GroceryList = ({ navigation, route }) => {
     }
   };
 
-  const sendNotification = (message) => {
-    setNotification(message);
-    setTimeout(() => {
-      setNotification('');
-    }, 2000);
-  };
+  useEffect(() => {
+    getItems();
+  }, []);
 
   return (
     <View style={styles.container}>
-      {notification != '' ? (
+      {notification !== '' ? (
         <View style={styles.notification}>
           <Text style={styles.notificationText}>{notification}</Text>
         </View>
-      ) : (
-        <></>
-      )}
+      ) : null}
 
       <ScrollView style={styles.scroll}>
         {items.items.length > 0 ? (
           items.items.map((item, index) => (
-            <ListItem key={index} onLongPress={() => toggleOverlayMenu(item)} bottomDivider>
+            <ListItem
+              // eslint-disable-next-line react/no-array-index-key
+              key={index}
+              onLongPress={() => toggleOverlayMenu(item)}
+              bottomDivider
+              hasTVPreferredFocus={undefined}
+              tvParallaxProperties={undefined}
+            >
               <CheckBox
                 checked={item.bought}
                 checkedColor="rgb(248, 110, 69)"
                 onPress={() => handlerCheck(item.id)}
               />
               <ListItem.Content>
-                <ListItem.Title style={styles.listTitle}>{item.title}</ListItem.Title>
-                <ListItem.Subtitle>R$ {item.price.toFixed(2)}</ListItem.Subtitle>
+                <ListItem.Title style={styles.listTitle}>
+                  {item.title}
+                </ListItem.Title>
+                <ListItem.Subtitle>
+                  R$
+                  {item.price.toFixed(2)}
+                </ListItem.Subtitle>
               </ListItem.Content>
               <Text style={styles.itemQuantity}>{item.quantity}</Text>
             </ListItem>
@@ -164,18 +196,21 @@ const GroceryList = ({ navigation, route }) => {
           placeholder="Nome"
           value={title}
           onChangeText={(text) => setTitle(text)}
+          autoCompleteType={undefined}
         />
         <Input
           label="Quantidade"
           placeholder="Quantidade"
           value={quantity.toString()}
-          onChangeText={(text) => setQuantity(text)}
+          onChangeText={(text) => setQuantity(parseInt(text, 10) || 1)}
+          autoCompleteType={undefined}
         />
         <Input
           label="Preço"
           placeholder="Preço"
           value={price.toString()}
-          onChangeText={(text) => setPrice(text)}
+          onChangeText={(text) => setPrice(parseFloat(text) || 1)}
+          autoCompleteType={undefined}
         />
 
         <TouchableOpacity style={styles.button} onPress={handlerCreate}>
@@ -193,18 +228,21 @@ const GroceryList = ({ navigation, route }) => {
           placeholder="Nome"
           value={title}
           onChangeText={(text) => setTitle(text)}
+          autoCompleteType={undefined}
         />
         <Input
           label="Quantidade"
           placeholder="Quantidade"
           value={quantity.toString()}
-          onChangeText={(text) => setQuantity(text)}
+          onChangeText={(text) => setQuantity(parseInt(text, 10) || 1)}
+          autoCompleteType={undefined}
         />
         <Input
           label="Preço"
           placeholder="Preço"
           value={price.toString()}
-          onChangeText={(text) => setPrice(text)}
+          onChangeText={(text) => setPrice(parseFloat(text) || 1)}
+          autoCompleteType={undefined}
         />
 
         <TouchableOpacity style={styles.button} onPress={handlerUpdate}>
@@ -217,7 +255,12 @@ const GroceryList = ({ navigation, route }) => {
         onBackdropPress={toggleOverlayMenu}
         overlayStyle={styles.overlay}
       >
-        <ListItem onPress={toggleOverlayUpdate} bottomDivider>
+        <ListItem
+          onPress={toggleOverlayUpdate}
+          bottomDivider
+          hasTVPreferredFocus={undefined}
+          tvParallaxProperties={undefined}
+        >
           <ListItem.Content>
             <ListItem.Title>
               <Icon name="edit" size={20} color="black" />
@@ -225,7 +268,11 @@ const GroceryList = ({ navigation, route }) => {
             </ListItem.Title>
           </ListItem.Content>
         </ListItem>
-        <ListItem onPress={handlerDelete}>
+        <ListItem
+          onPress={handlerDelete}
+          hasTVPreferredFocus={undefined}
+          tvParallaxProperties={undefined}
+        >
           <ListItem.Content>
             <ListItem.Title>
               <Icon name="trash" size={20} color="black" />
@@ -237,14 +284,21 @@ const GroceryList = ({ navigation, route }) => {
 
       <View style={styles.footer}>
         <Text style={styles.link}>
-          R$ {items.total.toFixed(2)} / {items.itemsQuantity} itens
+          `R$ $
+          {items.total.toFixed(2)}
+          {' '}
+          /$
+          {items.itemsQuantity}
+          {' '}
+          itens`
         </Text>
-        <TouchableOpacity style={styles.floatButton} onPress={toggleOverlayCreate}>
+        <TouchableOpacity
+          style={styles.floatButton}
+          onPress={toggleOverlayCreate}
+        >
           <Icon name="plus" size={20} color="rgb(248, 110, 69)" />
         </TouchableOpacity>
       </View>
     </View>
   );
-};
-
-export default GroceryList;
+}

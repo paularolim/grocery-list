@@ -1,4 +1,6 @@
-import React from "react";
-import { RegisterView } from "./RegisterView";
+import React from 'react';
+import { RegisterView } from './RegisterView';
 
-export const ViewModel = () => <RegisterView />;
+export function ViewModel() {
+  return <RegisterView />;
+}

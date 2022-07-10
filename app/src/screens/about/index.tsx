@@ -4,7 +4,7 @@ import { Text } from 'react-native-elements';
 
 import styles from '../styles/profile';
 
-const Profile = ({ navigation }) => {
+export function About() {
   return (
     <View style={styles.container}>
       <View style={styles.about}>
@@ -15,6 +15,4 @@ const Profile = ({ navigation }) => {
       </View>
     </View>
   );
-};
-
-export default Profile;
+}

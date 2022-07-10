@@ -1,13 +1,15 @@
 import React, { useContext } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 
-import AuthRoutes from './authRoutes';
-import AppRoutes from './appRoutes';
+import { AuthRoutes } from './authRoutes';
+import { AppRoutes } from './appRoutes';
 
 import authContext from '../contexts/authContext';
 
-const Routes = () => {
+function Routes() {
   const { loading, signed } = useContext(authContext);
+
+  console.log('aquiii');
 
   if (loading) {
     return (
@@ -17,6 +19,6 @@ const Routes = () => {
     );
   }
   return signed ? <AppRoutes /> : <AuthRoutes />;
-};
+}
 
 export default Routes;

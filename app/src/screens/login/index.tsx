@@ -1,66 +1,11 @@
+import { ParamListBase } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
 import React, { useState, useContext } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from 'react-native-elements';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import authContext from '../../contexts/authContext';
-
-const Login = ({ navigation }) => {
-  const { signIn } = useContext(authContext);
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const [passwordVisibility, setPasswordVisibility] = useState(true);
-  const [passwordIcon, setPasswordIcon] = useState('eye-outline');
-
-  const changePasswordVisibility = () => {
-    setPasswordVisibility(!passwordVisibility);
-    setPasswordIcon(passwordIcon == 'eye-outline' ? 'eye-off-outline' : 'eye-outline');
-  };
-
-  const handlerLogin = async () => {
-    await signIn(email, password);
-  };
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        label="Email"
-        placeholder="Email"
-        onChangeText={(text) => setEmail(text)}
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Senha</Text>
-      <View style={[styles.input, styles.inputWithIcon]}>
-        <TextInput
-          placeholder="*********"
-          secureTextEntry={passwordVisibility}
-          onChangeText={(text) => setPassword(text)}
-          style={{ flex: 1 }}
-        />
-        <Ionicons
-          name={passwordIcon}
-          size={20}
-          color={'rgb(248, 110, 69)'}
-          onPress={changePasswordVisibility}
-        />
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handlerLogin}>
-        <Text style={styles.buttonText}>Entrar</Text>
-      </TouchableOpacity>
-
-      <Text onPress={() => navigation.navigate('Register')} style={styles.link}>
-        Registre-se
-      </Text>
-    </View>
-  );
-};
-
-export default Login;
+import { AuthContext } from '../../contexts/authContext';
 
 const styles = StyleSheet.create({
   container: {
@@ -104,3 +49,60 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export function Login({ navigation }: StackScreenProps<ParamListBase, any>) {
+  const { signIn } = useContext(AuthContext);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const [passwordVisibility, setPasswordVisibility] = useState(true);
+  const [passwordIcon, setPasswordIcon] = useState('eye-outline');
+
+  const changePasswordVisibility = () => {
+    setPasswordVisibility(!passwordVisibility);
+    setPasswordIcon(
+      passwordIcon === 'eye-outline' ? 'eye-off-outline' : 'eye-outline',
+    );
+  };
+
+  const handlerLogin = async () => {
+    await signIn(email, password);
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Email</Text>
+      <TextInput
+        // label="Email"
+        placeholder="Email"
+        onChangeText={(text) => setEmail(text)}
+        style={styles.input}
+      />
+
+      <Text style={styles.label}>Senha</Text>
+      <View style={[styles.input, styles.inputWithIcon]}>
+        <TextInput
+          placeholder="*********"
+          secureTextEntry={passwordVisibility}
+          onChangeText={(text) => setPassword(text)}
+          style={{ flex: 1 }}
+        />
+        <Ionicons
+          name={passwordIcon}
+          size={20}
+          color="rgb(248, 110, 69)"
+          onPress={changePasswordVisibility}
+        />
+      </View>
+
+      <TouchableOpacity style={styles.button} onPress={handlerLogin}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
+
+      <Text onPress={() => navigation.navigate('Register')} style={styles.link}>
+        Registre-se
+      </Text>
+    </View>
+  );
+}

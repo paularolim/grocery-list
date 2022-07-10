@@ -1,1 +1,1 @@
-export { ViewModel as Register } from "./ViewModel";
+export { ViewModel as Register } from './ViewModel';

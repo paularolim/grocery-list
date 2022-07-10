@@ -5,7 +5,7 @@ const { width, height } = Dimensions.get('window');
 export default StyleSheet.create({
   container: {
     height: height - 60,
-    width: width,
+    width,
   },
   notification: {
     zIndex: 2,
@@ -16,9 +16,7 @@ export default StyleSheet.create({
     position: 'absolute',
     right: 0,
   },
-  notificationText: {
-    color: 'rgb(255, 255, 255)',
-  },
+  notificationText: { color: 'rgb(255, 255, 255)' },
   scroll: {
     height: 460,
     marginBottom: 100,
@@ -72,10 +70,6 @@ export default StyleSheet.create({
     color: 'rgb(255, 255, 255)',
     fontSize: 16,
   },
-  overlay: {
-    width: width - 100,
-  },
-  labelMenu: {
-    marginLeft: 20,
-  },
+  overlay: { width: width - 100 },
+  labelMenu: { marginLeft: 20 },
 });
