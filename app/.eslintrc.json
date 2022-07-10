@@ -24,11 +24,7 @@
   "rules": {
     "import/prefer-default-export": "off",
     "react/jsx-props-no-spreading": "off",
-    "object-curly-newline": [
-      "error",
-      {
-        "multiline": true
-      }
-    ]
+    "object-curly-newline": "off",
+    "import/no-extraneous-dependencies": "off"
   }
 }
